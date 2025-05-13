@@ -34,7 +34,6 @@ import docking.ComponentProvider;
 import docking.WindowPosition;
 import docking.action.DockingAction;
 import docking.action.ToolBarData;
-import dolphindebugger.GDBMessages.GDBMessage;
 import ghidra.app.services.DebuggerLogicalBreakpointService;
 import ghidra.app.services.DebuggerTraceManagerService;
 import ghidra.app.services.ProgramManager;
@@ -56,6 +55,9 @@ import ghidra.util.Msg;
 import ghidra.util.exception.CancelledException;
 import ghidra.util.task.TaskMonitor;
 import resources.Icons;
+
+import dolphindebugger.GDB.DolphinGDBDebuggerModel;
+import dolphindebugger.GDB.Messages.GDBMessage;
 
 public class DolphinComponentProvider extends ComponentProvider implements LogicalBreakpointsChangeListener {
 

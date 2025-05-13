@@ -3,7 +3,6 @@ package dolphindebugger;
 import ghidra.app.services.DebuggerStaticMappingService;
 import ghidra.app.services.DebuggerTraceManagerService;
 import ghidra.app.services.ProgramManager;
-import ghidra.dbg.target.schema.DefaultTargetObjectSchema;
 import ghidra.framework.model.DomainFile;
 import ghidra.framework.model.DomainFolder;
 import ghidra.framework.plugintool.PluginTool;
@@ -41,7 +40,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import dolphindebugger.GDBMessages.GDBMessage;
+import dolphindebugger.GDB.Messages.GDBMessage;
+import dolphindebugger.GDB.DolphinGDBDebuggerModel;
 
 public class DolphinTraceManager {
 	

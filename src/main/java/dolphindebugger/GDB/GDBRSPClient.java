@@ -1,4 +1,4 @@
-package dolphindebugger;
+package dolphindebugger.GDB;
 
 import java.io.*;
 import java.net.*;
