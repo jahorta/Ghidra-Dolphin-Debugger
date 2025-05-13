@@ -264,15 +264,16 @@ public class DolphinTraceManager {
         TraceStack stack = trace.getStackManager().getStack(thread, snapshot.getKey(), true);
         trace.getMemoryManager().getMemoryRegisterSpace(stack.getFrame(0, true), true).setValue(snapshot.getKey(), regValue);
         
-        Msg.info(this, String.format("Set Register Value %s = 0x%X @ %s", regName, value));
+        Msg.info(this, String.format("Set Register Value %s = 0x%X @ %s", regName, String.valueOf(value)));
     }
 
     private void writeStackFrame(List<String> stackEntries) {
         if (trace == null || thread == null) return;
+        TraceStack stack = trace.getStackManager().getStack(thread, snapshot.getKey(), true);
+	    Lifespan lifespan = Lifespan.at(snapshot.getKey());
+
         for (int i = 0; i < stackEntries.size(); i++) {
         	String address = stackEntries.get(i);
-            TraceStack stack = trace.getStackManager().getStack(thread, snapshot.getKey(), true);
-	        Lifespan lifespan = Lifespan.at(snapshot.getKey());
             Address addr;
 			try {
 				addr = trace.getBaseAddressFactory().getDefaultAddressSpace().getAddress(address);
