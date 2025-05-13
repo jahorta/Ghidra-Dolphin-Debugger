@@ -5,7 +5,7 @@ Connects to the GDB stub exposed by Dolphin Emulator to provide emulator state i
 
 ## Features
 - Connects to the GDB stub exposed by Dolphin Emulator
-- Add and remove breakpoints
+- Add and remove breakpoints using Ghidra's interface
 - Continue or Step emulation
 - Take snapshot of emulator state
     - Stack Frames
