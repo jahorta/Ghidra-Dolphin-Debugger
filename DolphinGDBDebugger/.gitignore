@@ -1,0 +1,10 @@
+/dist/
+/.gradle/*
+/bin/*
+/data/README.txt
+/ghidra_scripts/README.txt
+lib/README.txt
+os/linux_x86_64/README.txt
+os/mac_x86_64/README.txt
+os/win_x86_64/README.txt
+src/main/resources/images/README.txt
