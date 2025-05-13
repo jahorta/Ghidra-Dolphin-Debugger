@@ -293,53 +293,6 @@ public class DolphinGDBTraceManager {
         mem.putBytes(snapshot.getKey(), addr, buffer);
     }
     
-    public void updateTraceObjectsOnStop(Trace trace, TraceThread thread, Map<String, String> registerHexValues) {
-        if (trace == null || thread == null) return;
-
-        int snap = trace.getTimeManager().getSnapshotCount() > 0
-            ? (int) trace.getTimeManager().getLatestSnapshot().getKey()
-            : 0;
-
-        trace.startTransaction("Update Trace Object Model");
-        try {
-            var objectManager = trace.getObjectManager();
-
-            // Ensure root object exists
-            if (objectManager.getRootObject() == null) {
-                objectManager.createRootObject(new DefaultTargetObjectSchema(null, null, null, null, false, null, null, null, null, registerHexValues, null, null));
-            }
-
-            // Add thread if missing
-            objectManager.addThread(thread.getName(), thread.getKey());
-
-            // Add a pseudo-memory region to hold registers
-            var space = trace.getBaseAddressFactory().getRegisterSpace();
-            Address regBase = space.getAddress(0);
-            long length = 0x1000; // accommodate all registers
-            Address regEnd = space.getAddress(regBase.getOffset() + length - 1);
-
-            objectManager.createObject(null)..addMemoryRegion("RegisterRegion", new AddressRangeImpl(regBase, regEnd), snap);
-
-            // Optionally add each register as a child object under the root or region
-            for (Map.Entry<String, String> entry : registerHexValues.entrySet()) {
-                String regName = entry.getKey();
-                String valueHex = entry.getValue();
-                try {
-                    objectManager.getRootObject()
-                        .createSuccessor(List.of("Registers", regName), "Register")
-                        .changeAttributes(List.of(), Map.of("value", valueHex), "Updated");
-                } catch (Exception e) {
-                    Msg.warn(this, "Could not add register: " + regName + ": " + e.getMessage());
-                }
-            }
-
-            Msg.info(this, "[TraceObjectManager] Live model updated on STOP");
-        } finally {
-            trace.endTransaction(trace.startTransaction("Update Trace Object Model"), true);
-        }
-    }
-
-
     public Trace getTrace() {
         return trace;
     }
