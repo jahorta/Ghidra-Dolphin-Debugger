@@ -27,6 +27,7 @@ public class DolphinGDBDebuggerModel {
     private final AtomicBoolean running = new AtomicBoolean(false);
     private JTextArea outputArea;
     
+    private static final String LOG_NAME = "GDB Debugger";
     private static final Map<String, Integer> REGISTER_ID_MAP = buildRegisterMap();
 
     private static Map<String, Integer> buildRegisterMap() {
@@ -117,7 +118,7 @@ public class DolphinGDBDebuggerModel {
                 }
             } catch (IOException e) {
                 if (running.get()) {
-                    Msg.error(this, "[GDB Model]Reader thread error: " + e.getMessage());
+                    Msg.error(this, "[" + LOG_NAME + "]Reader thread error: " + e.getMessage());
                 }
             }
         }, "GDB-RSP-Listener");
@@ -157,7 +158,7 @@ public class DolphinGDBDebuggerModel {
     
     private void handleAsyncMessage(GDBMessage msg) {
         // Placeholder for async message handling logic
-    	Msg.debug(this, "[GDB Model] Async Message Recieved: [" + msg.getType() + "] " + msg.getRaw());
+    	Msg.debug(this, "[" + LOG_NAME + "] Async Message Recieved: [" + msg.getType() + "] " + msg.getRaw());
     	if (msg.getType() == GDBMessageType.UNKNOWN) {
     		outputArea.append("[Async] [Unknown Type]" + msg.getRaw() + "\n");
     	} else {
@@ -171,7 +172,7 @@ public class DolphinGDBDebuggerModel {
 
     public synchronized GDBMessage sendCommand(String command, boolean awaitResponse) throws IOException {
         rspClient.sendPacket(command);
-        Msg.debug(this, "[GDB Model] Command sent: " + command);
+        Msg.debug(this, "[" + LOG_NAME + "] Command sent: " + command);
         
         if (!awaitResponse) {
             return new GDBMessage("SENT", GDBMessageType.ASYNC);
@@ -184,7 +185,7 @@ public class DolphinGDBDebuggerModel {
                 throw new IOException("Timeout waiting for GDB response");
             }
 
-            Msg.debug(this, "[GDB Model] Message Recieved: [" + msg.getType() + "] " + msg.getRaw());
+            Msg.debug(this, "[" + LOG_NAME + "] Message Recieved: [" + msg.getType() + "] " + msg.getRaw());
             return msg;
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
