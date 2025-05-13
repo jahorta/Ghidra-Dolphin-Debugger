@@ -1,4 +1,4 @@
-package dolphingdbdebugger.GDBMessages;
+package dolphindebugger.GDBMessages;
 
 public enum GDBMessageType {
     RESPONSE,       // Generic response to a command

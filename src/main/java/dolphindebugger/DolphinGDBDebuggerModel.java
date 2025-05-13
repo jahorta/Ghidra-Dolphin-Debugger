@@ -1,4 +1,4 @@
-package dolphingdbdebugger;
+package dolphindebugger;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -12,8 +12,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.JTextArea;
 
-import dolphingdbdebugger.GDBMessages.GDBMessage;
-import dolphingdbdebugger.GDBMessages.GDBMessageType;
+import dolphindebugger.GDBMessages.GDBMessage;
+import dolphindebugger.GDBMessages.GDBMessageType;
 import ghidra.util.Msg;
 
 public class DolphinGDBDebuggerModel {

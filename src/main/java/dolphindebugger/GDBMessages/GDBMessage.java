@@ -1,4 +1,4 @@
-package dolphingdbdebugger.GDBMessages;
+package dolphindebugger.GDBMessages;
 
 public class GDBMessage {
     private final String raw;

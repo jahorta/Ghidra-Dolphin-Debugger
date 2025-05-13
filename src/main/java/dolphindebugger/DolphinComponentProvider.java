@@ -1,4 +1,4 @@
-package dolphingdbdebugger;
+package dolphindebugger;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
@@ -34,7 +34,7 @@ import docking.ComponentProvider;
 import docking.WindowPosition;
 import docking.action.DockingAction;
 import docking.action.ToolBarData;
-import dolphingdbdebugger.GDBMessages.GDBMessage;
+import dolphindebugger.GDBMessages.GDBMessage;
 import ghidra.app.services.DebuggerLogicalBreakpointService;
 import ghidra.app.services.DebuggerTraceManagerService;
 import ghidra.app.services.ProgramManager;
@@ -57,7 +57,7 @@ import ghidra.util.exception.CancelledException;
 import ghidra.util.task.TaskMonitor;
 import resources.Icons;
 
-public class DolphinGDBComponentProvider extends ComponentProvider implements LogicalBreakpointsChangeListener {
+public class DolphinComponentProvider extends ComponentProvider implements LogicalBreakpointsChangeListener {
 
 		private JPanel panel;
         private JTextArea textArea;
@@ -70,7 +70,7 @@ public class DolphinGDBComponentProvider extends ComponentProvider implements Lo
         private DolphinGDBDebuggerModel model;
         private Thread asyncUiThread;
         private final AtomicBoolean asyncRunning = new AtomicBoolean(false);
-        private DolphinGDBTraceManager traceManager;
+        private DolphinTraceManager traceManager;
         private PluginTool tool;
         
         private final List<String> commandHistory = new ArrayList<>();
@@ -84,7 +84,7 @@ public class DolphinGDBComponentProvider extends ComponentProvider implements Lo
         
         
 
-        public DolphinGDBComponentProvider(PluginTool tool, String name, String owner) {
+        public DolphinComponentProvider(PluginTool tool, String name, String owner) {
         	super(tool, "Dolphin GDB Debugger", owner);
             setTitle("Dolphin GDB Debugger");
             setWindowMenuGroup("Debugger");
@@ -96,7 +96,7 @@ public class DolphinGDBComponentProvider extends ComponentProvider implements Lo
             createActions();
             this.tool = tool;
             model = new DolphinGDBDebuggerModel(textArea);
-            traceManager = new DolphinGDBTraceManager(tool);
+            traceManager = new DolphinTraceManager(tool);
             loadCommandHistoryFromFile();
             tool.getService(DebuggerLogicalBreakpointService.class).addChangeListener(this);
         }
@@ -504,7 +504,7 @@ public class DolphinGDBComponentProvider extends ComponentProvider implements Lo
         }
         
         public void saveAndCloseTrace() {
-            DolphinGDBTraceManager manager = this.traceManager;
+            DolphinTraceManager manager = this.traceManager;
             if (manager != null && manager.getTrace() != null) {
                 DBTrace trace = (DBTrace) manager.getTrace();
                 if (trace.isChanged()) {
@@ -525,7 +525,7 @@ public class DolphinGDBComponentProvider extends ComponentProvider implements Lo
         
         public void saveCommandHistoryToFile() {
             try {
-            	File dir = new File(Application.getUserSettingsDirectory(), "DolphinGDBDebugger");
+            	File dir = new File(new File(Application.getUserSettingsDirectory(), "Extensions"), "DolphinDebugger");
             	if (!dir.exists()) {
             	    dir.mkdirs();
             	}
@@ -543,7 +543,7 @@ public class DolphinGDBComponentProvider extends ComponentProvider implements Lo
         
         public void loadCommandHistoryFromFile() {
             try {
-                Path file = new File(new File(Application.getUserSettingsDirectory(), "DolphinGDBDebugger"), "command-history.txt").toPath();
+                Path file = new File(new File(new File(Application.getUserSettingsDirectory(), "Extensions"), "DolphinDebugger"), "command-history.txt").toPath();
 
 
                 if (Files.exists(file)) {

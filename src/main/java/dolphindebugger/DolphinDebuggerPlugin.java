@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dolphingdbdebugger;
+package dolphindebugger;
 
 import ghidra.app.plugin.PluginCategoryNames;
 import ghidra.app.plugin.ProgramPlugin;
@@ -24,22 +24,22 @@ import ghidra.util.HelpLocation;
 import ghidra.util.Msg;
 
 @PluginInfo(
-    status = PluginStatus.UNSTABLE,
+    status = PluginStatus.STABLE,
     packageName = "Dolphin GDB Debugger",
     category = PluginCategoryNames.DEBUGGER,
     shortDescription = "Debugger for Dolphin GDB stub",
     description = "Connects to and manages debugging sessions to the Dolphin GDB stub using the devkitPPC version of GDB."
 )
-public class DolphinGDBDebuggerPlugin extends ProgramPlugin {
+public class DolphinDebuggerPlugin extends ProgramPlugin {
 
-    private DolphinGDBComponentProvider provider;
+    private DolphinComponentProvider provider;
 
-    public DolphinGDBDebuggerPlugin(PluginTool tool) {
+    public DolphinDebuggerPlugin(PluginTool tool) {
         super(tool);
         Msg.info(this, "DolphinGDB Debugger Plugin initialized");
 
         String pluginName = getName();
-        provider = new DolphinGDBComponentProvider(this.getTool(), pluginName, pluginName);
+        provider = new DolphinComponentProvider(this.getTool(), pluginName, pluginName);
 
         String topicName = this.getClass().getPackage().getName();
         String anchorName = "HelpAnchor";

@@ -1,4 +1,4 @@
-package dolphingdbdebugger;
+package dolphindebugger;
 
 import java.io.*;
 import java.net.*;

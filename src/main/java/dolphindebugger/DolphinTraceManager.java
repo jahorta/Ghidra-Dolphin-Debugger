@@ -1,4 +1,4 @@
-package dolphingdbdebugger;
+package dolphindebugger;
 
 import ghidra.app.services.DebuggerStaticMappingService;
 import ghidra.app.services.DebuggerTraceManagerService;
@@ -41,9 +41,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import dolphingdbdebugger.GDBMessages.GDBMessage;
+import dolphindebugger.GDBMessages.GDBMessage;
 
-public class DolphinGDBTraceManager {
+public class DolphinTraceManager {
 	
     private final PluginTool tool;
 
@@ -51,7 +51,7 @@ public class DolphinGDBTraceManager {
     private TraceThread thread;
     private TraceSnapshot snapshot;
 
-    public DolphinGDBTraceManager(PluginTool tool) {
+    public DolphinTraceManager(PluginTool tool) {
         this.tool = tool;
     }
 
