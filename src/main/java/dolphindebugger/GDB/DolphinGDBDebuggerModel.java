@@ -76,11 +76,7 @@ public class DolphinGDBDebuggerModel {
         startAsyncHandlerThread();
         
         // Send initial packet to keep Dolphin's GDB stub happy
-        try {
-            queryStopReason();
-        } catch (IOException e) {
-            System.err.println("Failed to send initial query after connect: " + e.getMessage());
-        }
+        queryStopReason();
     }
     
     public BlockingQueue<GDBMessage> getExternalAsyncQueue() {
@@ -194,8 +190,13 @@ public class DolphinGDBDebuggerModel {
     }
 
     // Example command helpers
-    public GDBMessage queryStopReason() throws IOException {
-        return sendCommand("?");
+    public void queryStopReason() {
+        try {
+			sendCommand("?", false);
+		} catch (IOException e) {
+			// This should never happen since we are not waiting for a response
+			Msg.error(this, "[" + LOG_NAME + "] Got a response error from query stop reason. This should not happen." + e);
+		}
     }
 
     public Set<String> listRegisters() {
@@ -278,20 +279,40 @@ public class DolphinGDBDebuggerModel {
         return sendCommand(String.format("m%x,%x", address, length));
     }
     
-    public void setBreakpoint(long address) throws IOException {
-        sendCommand(String.format("Z0,%x,4", address)); // Assuming 4-byte instruction
+    public void setBreakpoint(long address) {
+        try {
+			sendCommand(String.format("Z0,%x,4", address));
+		} catch (IOException e) {
+			// This should never happen since we are not waiting for a response
+			Msg.error(this, "[" + LOG_NAME + "] Got a response error from set breakpoint. This should not happen." + e);
+		} // Assuming 4-byte instruction
     }
     
-    public void removeBreakpoint(long address) throws IOException {
-    	sendCommand(String.format("z0,%x,4", address)); // Assuming 4-byte instruction
+    public void removeBreakpoint(long address) {
+    	try {
+			sendCommand(String.format("z0,%x,4", address));
+		} catch (IOException e) {
+			// This should never happen since we are not waiting for a response
+			Msg.error(this, "[" + LOG_NAME + "] Got a response error from remove breakpoint. This should not happen." + e);
+		} // Assuming 4-byte instruction
     }
 
-    public void continueExecution() throws IOException {
-        sendCommand("c", false);
+    public void continueExecution() {
+        try {
+			sendCommand("c", false);
+		} catch (IOException e) {
+			// This should never happen since we are not waiting for a response
+			Msg.error(this, "[" + LOG_NAME + "] Got a response error from continue. This should not happen." + e);
+		}
     }
 
-    public void singleStep() throws IOException {
-        sendCommand("s", false);
+    public void singleStep() {
+        try {
+			sendCommand("s", false);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
     
     public List<String> getStackTrace(int maxDepth) throws IOException {
