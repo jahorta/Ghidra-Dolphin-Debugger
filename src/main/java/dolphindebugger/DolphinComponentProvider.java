@@ -620,13 +620,9 @@ public class DolphinComponentProvider extends ComponentProvider implements Logic
 
             Address address = lb.getAddress();
             long addrVal = address.getOffset();
-            try {
-				model.setBreakpoint(addrVal);
-				textArea.append("[Logical Breakpoint] Sent to GDB at 0x" + Long.toHexString(addrVal) + "\n");
-			} catch (IOException e) {
-				Msg.error(this, "[Logical Breakpoint] Failed to add breakpoint:" + e);
-			}
-            
+
+			model.setBreakpoint(addrVal);
+			textArea.append("[Logical Breakpoint] Sent to GDB at 0x" + Long.toHexString(addrVal) + "\n");
         }
 
         @Override
@@ -635,13 +631,9 @@ public class DolphinComponentProvider extends ComponentProvider implements Logic
 
             Address address = lb.getAddress();
             long addrVal = address.getOffset();
-            try {
-				model.removeBreakpoint(addrVal);
-				textArea.append("[Logical Breakpoint] Removed from GDB at 0x" + Long.toHexString(addrVal) + "\n");
-			} catch (IOException e) {
-				Msg.error(this, "[Logical Breakpoint] Failed to remove breakpoint:" + e);
-			}
-            
+
+			model.removeBreakpoint(addrVal);
+			textArea.append("[Logical Breakpoint] Removed from GDB at 0x" + Long.toHexString(addrVal) + "\n");
         }
         
         @Override
