@@ -28,6 +28,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 
 import docking.ActionContext;
 import docking.ComponentProvider;
@@ -100,7 +101,9 @@ public class DolphinComponentProvider extends ComponentProvider implements Logic
             model = new DolphinGDBDebuggerModel(textArea);
             traceManager = new DolphinTraceManager(tool, model);
             loadCommandHistoryFromFile();
-            tool.getService(DebuggerLogicalBreakpointService.class).addChangeListener(this);
+            Msg.debug(this, "Waiting for DebuggerLogicalBreakpointService...");
+            textArea.append("[Initialization] Waiting for service registration.\n");
+            waitForBreakpointService();
         }
 
         private void buildPanel() {
@@ -208,6 +211,34 @@ public class DolphinComponentProvider extends ComponentProvider implements Logic
             settingsAction.setEnabled(true);
             settingsAction.markHelpUnnecessary();
             dockingTool.addLocalAction(this, settingsAction);
+        }
+        
+        private void waitForBreakpointService() {
+            final long startTime = System.currentTimeMillis();
+            final int timeoutMs = 5000; // 5 seconds
+            final int checkIntervalMs = 100;
+
+            Timer timer = new Timer(checkIntervalMs, null);
+            timer.addActionListener(e -> {
+                long elapsed = System.currentTimeMillis() - startTime;
+
+                DebuggerLogicalBreakpointService bpService =
+                    tool.getService(DebuggerLogicalBreakpointService.class);
+                
+                if (bpService != null) {
+                    bpService.addChangeListener(this);
+                    Msg.info(this, "Registered breakpoint listener.");
+                    textArea.append("[Initialization] Breakpoint listener registered\n");
+                    timer.stop();
+                } else if (elapsed >= timeoutMs) {
+                    Msg.warn(this, "Timed out waiting for DebuggerLogicalBreakpointService.");
+                    textArea.append("[Initialization] Breakpoint listener failed to register\n");
+                    timer.stop();
+                }
+            });
+
+            timer.setRepeats(true);
+            timer.start();
         }
         
         private void showHelp() {
