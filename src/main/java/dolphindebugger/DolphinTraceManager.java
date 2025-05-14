@@ -22,7 +22,9 @@ import ghidra.trace.model.Lifespan;
 import ghidra.trace.model.Trace;
 import ghidra.trace.model.thread.TraceThread;
 import ghidra.trace.model.time.TraceSnapshot;
+import ghidra.trace.model.memory.TraceMemoryFlag;
 import ghidra.trace.model.memory.TraceMemorySpace;
+import ghidra.trace.model.memory.TraceOverlappedRegionException;
 import ghidra.trace.model.modules.TraceStaticMapping;
 import ghidra.trace.model.modules.TraceStaticMappingManager;
 import ghidra.trace.model.stack.TraceStack;
@@ -30,10 +32,12 @@ import ghidra.util.Msg;
 import ghidra.util.exception.DuplicateNameException;
 import ghidra.util.task.TaskMonitor;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -50,12 +54,40 @@ public class DolphinTraceManager {
     private Trace trace;
     private TraceThread thread;
     private TraceSnapshot snapshot;
+    private DolphinGDBDebuggerModel model;
+    private List<MemoryBlock> programMemoryBlocks = null;
 
-    public DolphinTraceManager(PluginTool tool) {
+    public DolphinTraceManager(PluginTool tool, DolphinGDBDebuggerModel model) {
         this.tool = tool;
+        this.model = model;
+    }
+    
+    public void initializeProgramMemoryBlocks() {
+        ProgramManager programManager = tool.getService(ProgramManager.class);
+        if (programManager == null) {
+            Msg.error(this, "ProgramManager service not available.");
+            return;
+        }
+
+        Program program = programManager.getCurrentProgram();
+        if (program == null) {
+            Msg.error(this, "No program loaded in ProgramManager.");
+            return;
+        }
+
+        programMemoryBlocks = new ArrayList<>();
+        for (MemoryBlock block : program.getMemory().getBlocks()) {
+            long start = block.getStart().getOffset();
+            long end = block.getEnd().getOffset();
+            if (start >= 0x80000000L && end <= 0x81FFFFFFL) {
+                programMemoryBlocks.add(block);
+            }
+        }
+        Msg.info(this, "Initialized " + programMemoryBlocks.size() + " memory blocks from loaded program.");
     }
 
     public void createTrace(String name) {
+        initializeProgramMemoryBlocks();
         try {
             // Get the current program to use its language/compilerspec
             ProgramManager pm = tool.getService(ProgramManager.class);
@@ -166,7 +198,7 @@ public class DolphinTraceManager {
         }
     }
     
-    public void recordSnapshot(String name, DolphinGDBDebuggerModel model) {
+    public void recordSnapshot(String name) {
         if (trace == null) {
             Msg.showError(this, null, "Trace Error", "No trace has been created yet.");
             return;
@@ -179,7 +211,7 @@ public class DolphinTraceManager {
             try {
                 beginSnapshot(name);
                 
-                writeStackFrame(model.getStackTrace(16));
+                writeStackFrame();
                 
                 for (Map.Entry<String, Integer> entry : model.getRegisterIdMap().entrySet()) {
                     String regName = entry.getKey();
@@ -202,14 +234,7 @@ public class DolphinTraceManager {
                     }
                 }
                 
-                int spId = model.getRegisterIdMap().get("r1");
-                String spHex = model.readRegister(spId).getRaw();
-                long sp = Long.parseUnsignedLong(spHex, 16);
-
-                // Read memory from GDB and write to trace
-                int bytes = 64; // adjustable
-                byte[] memory = model.readMemory(sp, bytes).toByteArray();
-                writeMemory(sp, memory);
+                readAndSnapshotProgramMemory();
 
                 Msg.info(this, "Snapshot '" + name + "' recorded successfully");
 
@@ -267,21 +292,65 @@ public class DolphinTraceManager {
         Msg.info(this, String.format("Set Register Value %s = 0x%X @ %s", regName, String.valueOf(value)));
     }
 
-    private void writeStackFrame(List<String> stackEntries) {
-        if (trace == null || thread == null) return;
-        TraceStack stack = trace.getStackManager().getStack(thread, snapshot.getKey(), true);
-	    Lifespan lifespan = Lifespan.at(snapshot.getKey());
+    private void writeStackFrame() {
+		try {
+			List<String> stackEntries = model.getStackTrace(Integer.MAX_VALUE);
+			
+			if (trace == null || thread == null) return;
+	        TraceStack stack = trace.getStackManager().getStack(thread, snapshot.getKey(), true);
+		    Lifespan lifespan = Lifespan.at(snapshot.getKey());
 
-        for (int i = 0; i < stackEntries.size(); i++) {
-        	String address = stackEntries.get(i);
-            Address addr;
+	        for (int i = 0; i < stackEntries.size(); i++) {
+	        	String address = stackEntries.get(i);
+				try {
+					Address addr = trace.getBaseAddressFactory().getDefaultAddressSpace().getAddress(address);
+		            stack.getFrame(i, true).setProgramCounter(lifespan, addr);
+				} catch (AddressFormatException e) {
+					Msg.error(this,  "[Stack Frame " + i + "] Unable to parse address: " + address + "\n" + e);
+				}
+	        }
+		} catch (IOException e) {
+			Msg.error(this,  "Unable to get stack trace: " + e);
+		} 
+    }
+    
+    // Do not call alone, always wrap in transaction
+    private void readAndSnapshotProgramMemory() {
+        if (trace == null || programMemoryBlocks == null) return;
+        TraceMemorySpace memSpace = trace.getMemoryManager().getMemorySpace(trace.getBaseAddressFactory().getDefaultAddressSpace(), true);
+        long snap = snapshot.getKey();
+        Lifespan lifespan = Lifespan.at(snap);
+        
+        for (MemoryBlock block : programMemoryBlocks) {
+            long start = block.getStart().getOffset();
+            long end = block.getEnd().getOffset();
+
+            Address startAddr = trace.getBaseAddressFactory().getDefaultAddressSpace().getAddress(start);
+            Address endAddr = trace.getBaseAddressFactory().getDefaultAddressSpace().getAddress(end);
+            int length = (int) (end - start + 1);
+
 			try {
-				addr = trace.getBaseAddressFactory().getDefaultAddressSpace().getAddress(address);
-	            stack.getFrame(i, true).setProgramCounter(lifespan, addr);
-			} catch (AddressFormatException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				byte[] bytes = model.readMemory(start, length).toByteArray();
+				memSpace.putBytes(snap, startAddr, ByteBuffer.wrap(bytes));
+			} catch (IOException e) {
+				Msg.error(this, "Unable to read memory at " + startAddr.toString() + "\n" + e);
+				continue;
 			}
+			
+            Set<TraceMemoryFlag> flags = new HashSet<>();
+            if (block.isRead()) flags.add(TraceMemoryFlag.READ);
+            if (block.isWrite()) flags.add(TraceMemoryFlag.WRITE);
+            if (block.isExecute()) flags.add(TraceMemoryFlag.EXECUTE);
+
+            String regionName = block.getName();
+            try {
+				trace.getMemoryManager().addRegion(regionName, lifespan, new AddressRangeImpl(startAddr, endAddr), flags);
+			} catch (DuplicateNameException e) {
+				Msg.error(this, "Duplicate region name found: " + regionName + "\n" + e);
+			} catch (TraceOverlappedRegionException e) {
+				Msg.error(this, "Overlapping memory region found in trace: " + e);
+			}
+            Msg.info(this, String.format("[Memory] Region %s captured: [%08X - %08X]", regionName, start, end));
         }
     }
 

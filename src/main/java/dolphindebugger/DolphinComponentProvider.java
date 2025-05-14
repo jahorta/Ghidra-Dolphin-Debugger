@@ -98,7 +98,7 @@ public class DolphinComponentProvider extends ComponentProvider implements Logic
             createActions();
             this.tool = tool;
             model = new DolphinGDBDebuggerModel(textArea);
-            traceManager = new DolphinTraceManager(tool);
+            traceManager = new DolphinTraceManager(tool, model);
             loadCommandHistoryFromFile();
             tool.getService(DebuggerLogicalBreakpointService.class).addChangeListener(this);
         }
@@ -264,7 +264,7 @@ public class DolphinComponentProvider extends ComponentProvider implements Logic
                         if (traceManager.getTrace() == null) {
                             traceManager.createTrace("Dolphin Trace");
                         }
-                        traceManager.recordSnapshot("Connected", model);
+                        traceManager.recordSnapshot("Connected");
                         startAsyncUiThread();
                         dolphinHost = host;
                         dolphinPort = port;
@@ -320,7 +320,7 @@ public class DolphinComponentProvider extends ComponentProvider implements Logic
                     case "get-snapshot":
                         if (!ensureConnected()) break;
                         String snapName = args.length > 0 ? String.join(" ", args) : "Snapshot";
-                        traceManager.recordSnapshot(snapName, model);
+                        traceManager.recordSnapshot(snapName);
                         break;
                     case "set-breakpoint":
                     	if (!ensureConnected()) break;
