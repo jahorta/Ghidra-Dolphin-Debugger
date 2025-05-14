@@ -29,6 +29,7 @@ public class DolphinGDBDebuggerModel {
     
     private static final String LOG_NAME = "GDB Debugger";
     private static final Map<String, Integer> REGISTER_ID_MAP = buildRegisterMap();
+    private static final int MAX_MEM_BLOCK_SIZE = 0x100;
 
     private static Map<String, Integer> buildRegisterMap() {
         Map<String, Integer> map = new java.util.HashMap<>();
@@ -276,6 +277,16 @@ public class DolphinGDBDebuggerModel {
     }
 
     public GDBMessage readMemory(long address, int length) throws IOException {
+    	int fullBlocks = length / MAX_MEM_BLOCK_SIZE;
+    	int lastBlockLen = length % MAX_MEM_BLOCK_SIZE;
+    	
+    	StringBuilder allMessages = new StringBuilder();
+    	long curAddr = address;
+    	for (int i = 0; i < fullBlocks; i++) {
+    		curAddr = address + (i * MAX_MEM_BLOCK_SIZE);
+    		allMessages.append(sendCommand(String.format("m%x,%x", curAddr, MAX_MEM_BLOCK_SIZE)).getRaw());
+    	}
+    	allMessages.append(sendCommand(String.format("m%x,%x", curAddr, lastBlockLen)).getRaw());
         return sendCommand(String.format("m%x,%x", address, length));
     }
     
