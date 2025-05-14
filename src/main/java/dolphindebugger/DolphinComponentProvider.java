@@ -600,7 +600,7 @@ public class DolphinComponentProvider extends ComponentProvider implements Logic
                 Msg.warn(this, "[Breakpoint Sync] DebuggerLogicalBreakpointService not found.");
                 return;
             }
-            textArea.append("[Logical Breakpoint] Syncing breakpoints with Dolphin");
+            textArea.append("[Logical Breakpoint] Syncing breakpoints with Dolphin\n");
             for (LogicalBreakpoint lb : lbService.getAllBreakpoints()) {
                 if (!lb.computeState().isEnabled()) {
                     continue;
