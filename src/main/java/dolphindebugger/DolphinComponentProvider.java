@@ -314,8 +314,8 @@ public class DolphinComponentProvider extends ComponentProvider implements Logic
                         break;
                     case "step":
                     	if (!ensureConnected()) break;
-                        model.singleStep();
-                        textArea.append("[Sent: step]\n");
+//                        model.singleStep();
+                        textArea.append("[Step] Step does not work with the current version of Dolphin. Set a breakpoint to pause emulation\n");
                         break;
                     case "get-registers-all":
                         if (!ensureConnected()) break;
