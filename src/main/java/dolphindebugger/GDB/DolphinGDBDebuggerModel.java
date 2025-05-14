@@ -29,7 +29,7 @@ public class DolphinGDBDebuggerModel {
     
     private static final String LOG_NAME = "GDB Debugger";
     private static final Map<String, Integer> REGISTER_ID_MAP = buildRegisterMap();
-    private static final int MAX_MEM_BLOCK_SIZE = 0x100;
+    private static final int MAX_MEM_BLOCK_SIZE = 0x1000;
 
     private static Map<String, Integer> buildRegisterMap() {
         Map<String, Integer> map = new java.util.HashMap<>();
