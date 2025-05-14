@@ -624,6 +624,7 @@ public class DolphinComponentProvider extends ComponentProvider implements Logic
 
 			model.setBreakpoint(addrVal);
 			textArea.append("[Logical Breakpoint] Sent to GDB at 0x" + Long.toHexString(addrVal) + "\n");
+			Msg.info(this, "Breakpoint added." + Long.toHexString(addrVal));
         }
 
         @Override
@@ -635,6 +636,7 @@ public class DolphinComponentProvider extends ComponentProvider implements Logic
 
 			model.removeBreakpoint(addrVal);
 			textArea.append("[Logical Breakpoint] Removed from GDB at 0x" + Long.toHexString(addrVal) + "\n");
+			Msg.info(this, "Breakpoint removed." + Long.toHexString(addrVal));
         }
         
         @Override
