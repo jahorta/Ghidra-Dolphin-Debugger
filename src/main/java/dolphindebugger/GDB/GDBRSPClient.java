@@ -7,6 +7,7 @@ public class GDBRSPClient {
     private Socket socket;
     private BufferedReader reader;
     private BufferedWriter writer;
+    private final Boolean debug = false;
 
     public void connect(String host, int port) throws IOException {
         socket = new Socket(host, port);
@@ -35,7 +36,7 @@ public class GDBRSPClient {
         String packet = "$" + data + "#" + checksum(data);
         writer.write(packet);
         writer.flush();
-        System.out.println("Sent: " + packet);
+        if (debug) System.out.println("Sent: " + packet);
     }
 
     public String readPacket() throws IOException {
@@ -72,7 +73,7 @@ public class GDBRSPClient {
 		writer.write("+");
 		writer.flush(); // Send ACK
 
-        System.out.println("Received: " + data.toString());
+		if (debug) System.out.println("Received: " + data.toString());
         return data.toString();
     }
 }
