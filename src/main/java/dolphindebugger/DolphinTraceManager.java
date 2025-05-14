@@ -289,7 +289,7 @@ public class DolphinTraceManager {
         TraceStack stack = trace.getStackManager().getStack(thread, snapshot.getKey(), true);
         trace.getMemoryManager().getMemoryRegisterSpace(stack.getFrame(0, true), true).setValue(snapshot.getKey(), regValue);
         
-        Msg.info(this, String.format("Set Register Value %s = 0x%X @ %s", regName, String.valueOf(value)));
+        Msg.info(this, String.format("Set Register Value %s = 0x%X", regName, value));
     }
 
     private void writeStackFrame() {
