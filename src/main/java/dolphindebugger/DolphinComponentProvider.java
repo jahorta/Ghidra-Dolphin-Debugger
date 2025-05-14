@@ -648,4 +648,9 @@ public class DolphinComponentProvider extends ComponentProvider implements Logic
             	breakpointRemoved(lb);
             }
         }
+        
+        @Override
+        public void closeComponent() {
+        	super.closeComponent();
+        }
     }
