@@ -615,7 +615,7 @@ public class DolphinComponentProvider extends ComponentProvider implements Logic
         
         @Override
         public void breakpointAdded(LogicalBreakpoint lb) {
-            if (!ensureConnected()) return;
+            if (!ensureConnected(true)) return;
             if (!lb.computeState().isEnabled()) return;
 
             Address address = lb.getAddress();
@@ -631,7 +631,7 @@ public class DolphinComponentProvider extends ComponentProvider implements Logic
 
         @Override
         public void breakpointRemoved(LogicalBreakpoint lb) {
-            if (!ensureConnected()) return;
+            if (!ensureConnected(true)) return;
 
             Address address = lb.getAddress();
             long addrVal = address.getOffset();
@@ -646,7 +646,7 @@ public class DolphinComponentProvider extends ComponentProvider implements Logic
         
         @Override
         public void breakpointUpdated(LogicalBreakpoint lb) {
-            if (!ensureConnected()) return;
+            if (!ensureConnected(true)) return;
             
             Msg.info(this, "Received breakpoint update. Forwarding to appropriate handler");
             
