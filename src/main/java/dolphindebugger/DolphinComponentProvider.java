@@ -510,8 +510,12 @@ public class DolphinComponentProvider extends ComponentProvider implements Logic
         }
         
         private boolean ensureConnected() {
+            return ensureConnected(false);
+        }
+        
+        private boolean ensureConnected(Boolean quiet) {
             if (!model.isConnected()) {
-                textArea.append("[Error] Not connected to Dolphin GDB.\n");
+                if (!quiet) textArea.append("[Error] Not connected to Dolphin GDB.\n");
                 return false;
             }
             return true;
