@@ -305,6 +305,7 @@ public class DolphinComponentProvider extends ComponentProvider implements Logic
                     case "disconnect":
                     	if (!ensureConnected()) break;
                         model.disconnect();
+                        // TODO: close trace, with request whether to save or not. Deinit current trace
                         textArea.append("[Disconnected from Dolphin]\n");
                         break;
                     case "continue":
