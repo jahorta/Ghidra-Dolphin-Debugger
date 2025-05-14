@@ -277,17 +277,17 @@ public class DolphinGDBDebuggerModel {
     }
 
     public GDBMessage readMemory(long address, int length) throws IOException {
-    	int fullBlocks = length / MAX_MEM_BLOCK_SIZE;
-    	int lastBlockLen = length % MAX_MEM_BLOCK_SIZE;
+    	int fullBlockCount = length / MAX_MEM_BLOCK_SIZE;
+    	int lastBlockLength = length % MAX_MEM_BLOCK_SIZE;
     	
     	StringBuilder allMessages = new StringBuilder();
     	long curAddr = address;
-    	for (int i = 0; i < fullBlocks; i++) {
-    		curAddr = address + (i * MAX_MEM_BLOCK_SIZE);
+    	for (int i = 0; i < fullBlockCount; i++) {
     		allMessages.append(sendCommand(String.format("m%x,%x", curAddr, MAX_MEM_BLOCK_SIZE)).getRaw());
+    		curAddr += MAX_MEM_BLOCK_SIZE;
     	}
-    	allMessages.append(sendCommand(String.format("m%x,%x", curAddr, lastBlockLen)).getRaw());
-        return sendCommand(String.format("m%x,%x", address, length));
+    	if (lastBlockLength > 0) allMessages.append(sendCommand(String.format("m%x,%x", curAddr, lastBlockLength)).getRaw());
+        return GDBMessage.classify(allMessages.toString());
     }
     
     public void setBreakpoint(long address) {
